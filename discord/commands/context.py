@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, TypeVar
@@ -57,11 +58,7 @@ from ..utils import cached_property
 T = TypeVar("T")
 CogT = TypeVar("CogT", bound="Cog")
 
-if TYPE_CHECKING:
-    P = ParamSpec("P")
-else:
-    P = TypeVar("P")
-
+P = ParamSpec("P") if TYPE_CHECKING else TypeVar("P")
 __all__ = ("ApplicationContext", "AutocompleteContext")
 
 
@@ -339,10 +336,7 @@ class ApplicationContext(discord.abc.Messageable):
         """Returns the cog associated with this context's command.
         ``None`` if it does not exist.
         """
-        if self.command is None:
-            return None
-
-        return self.command.cog
+        return None if self.command is None else self.command.cog
 
 
 class AutocompleteContext:
@@ -384,7 +378,4 @@ class AutocompleteContext:
         """Returns the cog associated with this context's command.
         ``None`` if it does not exist.
         """
-        if self.command is None:
-            return None
-
-        return self.command.cog
+        return None if self.command is None else self.command.cog

@@ -1012,11 +1012,10 @@ class InteractionResponse:
         if file is not MISSING:
             if not isinstance(file, File):
                 raise InvalidArgument("file parameter must be a File")
-            else:
-                files = [file]
-                if "attachments" not in payload:
-                    # we keep previous attachments when adding a new file
-                    payload["attachments"] = [a.to_dict() for a in msg.attachments]
+            files = [file]
+            if "attachments" not in payload:
+                # we keep previous attachments when adding a new file
+                payload["attachments"] = [a.to_dict() for a in msg.attachments]
 
         if files is not MISSING:
             if len(files) > 10:

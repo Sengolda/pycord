@@ -89,26 +89,26 @@ class TicTacToe(discord.ui.View):
         # Check horizontal
         for across in self.board:
             value = sum(across)
-            if value == 3:
-                return self.O
-            elif value == -3:
+            if value == -3:
                 return self.X
 
+            elif value == 3:
+                return self.O
         # Check vertical
         for line in range(3):
             value = self.board[0][line] + self.board[1][line] + self.board[2][line]
-            if value == 3:
-                return self.O
-            elif value == -3:
+            if value == -3:
                 return self.X
 
+            elif value == 3:
+                return self.O
         # Check diagonals
         diag = self.board[0][2] + self.board[1][1] + self.board[2][0]
-        if diag == 3:
-            return self.O
-        elif diag == -3:
+        if diag == -3:
             return self.X
 
+        elif diag == 3:
+            return self.O
         diag = self.board[0][0] + self.board[1][1] + self.board[2][2]
         if diag == -3:
             return self.X
@@ -116,10 +116,7 @@ class TicTacToe(discord.ui.View):
             return self.O
 
         # If we're here, we need to check if a tie has been reached.
-        if all(i != 0 for row in self.board for i in row):
-            return self.Tie
-
-        return None
+        return self.Tie if all(i != 0 for row in self.board for i in row) else None
 
 
 intents = discord.Intents.default()

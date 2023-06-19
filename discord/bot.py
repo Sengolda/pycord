@@ -590,7 +590,7 @@ class ApplicationCommandMixin(ABC):
                 # Either the method is bulk or all the commands need to be modified, so we can just do a bulk upsert
                 data = [cmd["command"].to_dict() for cmd in filtered_deleted]
                 # If there's nothing to update, don't bother
-                if len(filtered_no_action) == 0:
+                if not filtered_no_action:
                     _log.debug("Skipping bulk command update: Commands are up to date")
                     registered = prefetched_commands
                 else:
@@ -764,18 +764,17 @@ class ApplicationCommandMixin(ABC):
                 registered_guild_commands[guild_id] = app_cmds
 
         for i in registered_commands:
-            cmd = get(
+            if cmd := get(
                 self.pending_application_commands,
                 name=i["name"],
                 guild_ids=None,
                 type=i.get("type"),
-            )
-            if cmd:
+            ):
                 cmd.id = i["id"]
                 self._application_commands[cmd.id] = cmd
 
         if register_guild_commands and registered_guild_commands:
-            for guild_id, guild_cmds in registered_guild_commands.items():
+            for guild_cmds in registered_guild_commands.values():
                 for i in guild_cmds:
                     cmd = find(
                         lambda cmd: cmd.name == i["name"]
@@ -1307,11 +1306,7 @@ class BotBase(ApplicationCommandMixin, CogMixin, ABC):
     ) -> bool:
         data = self._check_once if call_once else self._checks
 
-        if not data:
-            return True
-
-        # type-checker doesn't distinguish between functions and methods
-        return await async_all(f(ctx) for f in data)  # type: ignore
+        return True if not data else await async_all(f(ctx) for f in data)
 
     def before_invoke(self, coro):
         """A decorator that registers a coroutine as a pre-invoke hook.

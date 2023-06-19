@@ -424,9 +424,7 @@ class AutoModRule(Hashable):
     @cached_property
     def creator(self) -> Member | None:
         """The member who created this rule."""
-        if self.guild is None:
-            return None
-        return self.guild.get_member(self.creator_id)
+        return None if self.guild is None else self.guild.get_member(self.creator_id)
 
     @cached_property
     def exempt_roles(self) -> list[Role | Object]:

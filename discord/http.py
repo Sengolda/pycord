@@ -525,8 +525,6 @@ class HTTPClient:
         components: list[components.Component] | None = None,
         flags: int | None = None,
     ) -> Response[message.Message]:
-        form = []
-
         payload: dict[str, Any] = {"tts": tts}
         if content:
             payload["content"] = content
@@ -548,7 +546,7 @@ class HTTPClient:
             payload["flags"] = flags
 
         attachments = []
-        form.append({"name": "payload_json"})
+        form = [{"name": "payload_json"}]
         for index, file in enumerate(files):
             attachments.append(
                 {
@@ -607,10 +605,8 @@ class HTTPClient:
         files: Sequence[File],
         **payload,
     ) -> Response[message.Message]:
-        form = []
-
         attachments = []
-        form.append({"name": "payload_json"})
+        form = [{"name": "payload_json"}]
         for index, file in enumerate(files):
             attachments.append(
                 {
@@ -1076,10 +1072,6 @@ class HTTPClient:
         reason: str | None = None,
         **options: Any,
     ) -> Response[channel.GuildChannel]:
-        payload = {
-            "type": channel_type,
-        }
-
         valid_keys = (
             "name",
             "parent_id",
@@ -1094,10 +1086,9 @@ class HTTPClient:
             "video_quality_mode",
             "auto_archive_duration",
         )
-        payload.update(
-            {k: v for k, v in options.items() if k in valid_keys and v is not None}
-        )
-
+        payload = {
+            "type": channel_type,
+        } | {k: v for k, v in options.items() if k in valid_keys and v is not None}
         return self.request(
             Route("POST", "/guilds/{guild_id}/channels", guild_id=guild_id),
             json=payload,
@@ -1717,14 +1708,13 @@ class HTTPClient:
             }
         ]
 
-        for k, v in payload.items():
-            form.append(
-                {
-                    "name": k,
-                    "value": v,
-                }
-            )
-
+        form.extend(
+            {
+                "name": k,
+                "value": v,
+            }
+            for k, v in payload.items()
+        )
         return self.request(
             Route("POST", "/guilds/{guild_id}/stickers", guild_id=guild_id),
             form=form,
@@ -2326,10 +2316,7 @@ class HTTPClient:
         before: Snowflake = None,
         after: Snowflake = None,
     ) -> Response[list[scheduled_events.ScheduledEventSubscriber]]:
-        params = {
-            "limit": int(limit),
-            "with_member": int(with_member),
-        }
+        params = {"limit": limit, "with_member": int(with_member)}
 
         if before is not None:
             params["before"] = int(before)

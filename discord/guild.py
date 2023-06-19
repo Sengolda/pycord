@@ -898,10 +898,14 @@ class Guild(Hashable):
 
         .. versionadded:: 1.6
         """
-        for role in self._roles.values():
-            if role.is_premium_subscriber():
-                return role
-        return None
+        return next(
+            (
+                role
+                for role in self._roles.values()
+                if role.is_premium_subscriber()
+            ),
+            None,
+        )
 
     @property
     def self_role(self) -> Role | None:
@@ -1003,17 +1007,13 @@ class Guild(Hashable):
         offline members.
         """
         count = getattr(self, "_member_count", None)
-        if count is None:
-            return False
-        return count == len(self._members)
+        return False if count is None else count == len(self._members)
 
     @property
     def shard_id(self) -> int:
         """Returns the shard ID for this guild if applicable."""
         count = self._state.shard_count
-        if count is None:
-            return 0
-        return (self.id >> 22) % count
+        return 0 if count is None else (self.id >> 22) % count
 
     @property
     def created_at(self) -> datetime.datetime:

@@ -562,9 +562,7 @@ class Embed:
         If the footer is not set then `None` is returned.
         """
         foot = getattr(self, "_footer", None)
-        if not foot:
-            return None
-        return EmbedFooter.from_dict(foot)
+        return None if not foot else EmbedFooter.from_dict(foot)
 
     def set_footer(
         self: E,
@@ -624,9 +622,7 @@ class Embed:
         If the image is not set then `None` is returned.
         """
         img = getattr(self, "_image", None)
-        if not img:
-            return None
-        return EmbedMedia.from_dict(img)
+        return None if not img else EmbedMedia.from_dict(img)
 
     def set_image(self: E, *, url: Any | None) -> E:
         """Sets the image for the embed content.
@@ -684,9 +680,7 @@ class Embed:
         If the thumbnail is not set then `None` is returned.
         """
         thumb = getattr(self, "_thumbnail", None)
-        if not thumb:
-            return None
-        return EmbedMedia.from_dict(thumb)
+        return None if not thumb else EmbedMedia.from_dict(thumb)
 
     def set_thumbnail(self: E, *, url: Any | None) -> E:
         """Sets the thumbnail for the embed content.
@@ -743,9 +737,7 @@ class Embed:
         If the video is not set then `None` is returned.
         """
         vid = getattr(self, "_video", None)
-        if not vid:
-            return None
-        return EmbedMedia.from_dict(vid)
+        return None if not vid else EmbedMedia.from_dict(vid)
 
     @property
     def provider(self) -> EmbedProvider | None:
@@ -756,9 +748,7 @@ class Embed:
         If the provider is not set then `None` is returned.
         """
         prov = getattr(self, "_provider", None)
-        if not prov:
-            return None
-        return EmbedProvider.from_dict(prov)
+        return None if not prov else EmbedProvider.from_dict(prov)
 
     @property
     def author(self) -> EmbedAuthor | None:
@@ -769,9 +759,7 @@ class Embed:
         If the author is not set then `None` is returned.
         """
         auth = getattr(self, "_author", None)
-        if not auth:
-            return None
-        return EmbedAuthor.from_dict(auth)
+        return None if not auth else EmbedAuthor.from_dict(auth)
 
     def set_author(
         self: E,
@@ -879,7 +867,7 @@ class Embed:
         inline: :class:`bool`
             Whether the field should be displayed inline.
         """
-        self._fields.append(EmbedField(name=str(name), value=str(value), inline=inline))
+        self._fields.append(EmbedField(name=name, value=value, inline=inline))
 
         return self
 

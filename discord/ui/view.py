@@ -152,10 +152,11 @@ class View:
     def __init_subclass__(cls) -> None:
         children: list[ItemCallbackType] = []
         for base in reversed(cls.__mro__):
-            for member in base.__dict__.values():
-                if hasattr(member, "__discord_ui_model_type__"):
-                    children.append(member)
-
+            children.extend(
+                member
+                for member in base.__dict__.values()
+                if hasattr(member, "__discord_ui_model_type__")
+            )
         if len(children) > 25:
             raise TypeError("View cannot have more than 25 children")
 
@@ -263,9 +264,7 @@ class View:
 
     @property
     def _expires_at(self) -> float | None:
-        if self.timeout:
-            return time.monotonic() + self.timeout
-        return None
+        return time.monotonic() + self.timeout if self.timeout else None
 
     def add_item(self, item: Item) -> None:
         """Adds an item to the view.
@@ -368,8 +367,7 @@ class View:
         """
         if self.disable_on_timeout:
             self.disable_all_items()
-            message = self._message or self.parent
-            if message:
+            if message := self._message or self.parent:
                 m = await message.edit(view=self)
                 if m:
                     self._message = m
@@ -577,11 +575,9 @@ class ViewStore:
         return list(views.values())
 
     def __verify_integrity(self):
-        to_remove: list[tuple[int, int | None, str]] = []
-        for k, (view, _) in self._views.items():
-            if view.is_finished():
-                to_remove.append(k)
-
+        to_remove: list[tuple[int, int | None, str]] = [
+            k for k, (view, _) in self._views.items() if view.is_finished()
+        ]
         for k in to_remove:
             del self._views[k]
 

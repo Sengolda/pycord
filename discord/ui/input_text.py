@@ -62,7 +62,7 @@ class InputText:
         row: int | None = None,
     ):
         super().__init__()
-        if len(str(label)) > 45:
+        if len(label) > 45:
             raise ValueError("label must be 45 characters or fewer")
         if min_length and (min_length < 0 or min_length > 4000):
             raise ValueError("min_length must be between 0 and 4000")

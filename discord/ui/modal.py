@@ -98,9 +98,7 @@ class Modal:
 
     @property
     def _expires_at(self) -> float | None:
-        if self.timeout:
-            return time.monotonic() + self.timeout
-        return None
+        return time.monotonic() + self.timeout if self.timeout else None
 
     def _dispatch_timeout(self):
         if self._stopped.done():

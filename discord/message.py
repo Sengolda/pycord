@@ -304,8 +304,7 @@ class Attachment(Hashable):
             The attachment was deleted.
         """
         url = self.proxy_url if use_cached else self.url
-        data = await self._http.get_from_cdn(url)
-        return data
+        return await self._http.get_from_cdn(url)
 
     async def to_file(self, *, use_cached: bool = False, spoiler: bool = False) -> File:
         """|coro|
@@ -1175,38 +1174,38 @@ class Message(Hashable):
             return formats[created_at_ms % len(formats)].format(self.author.name)
 
         if self.type is MessageType.premium_guild_subscription:
-            if not self.content:
-                return f"{self.author.name} just boosted the server!"
-            else:
+            if self.content:
                 return (
                     f"{self.author.name} just boosted the server **{self.content}**"
                     " times!"
                 )
 
-        if self.type is MessageType.premium_guild_tier_1:
-            if not self.content:
-                return (
-                    f"{self.author.name} just boosted the server! {self.guild} has"
-                    " achieved **Level 1!**"
-                )
             else:
+                return f"{self.author.name} just boosted the server!"
+        if self.type is MessageType.premium_guild_tier_1:
+            if self.content:
                 return (
                     f"{self.author.name} just boosted the server **{self.content}**"
                     f" times! {self.guild} has achieved **Level 1!**"
                 )
 
-        if self.type is MessageType.premium_guild_tier_2:
-            if not self.content:
+            else:
                 return (
                     f"{self.author.name} just boosted the server! {self.guild} has"
-                    " achieved **Level 2!**"
+                    " achieved **Level 1!**"
                 )
-            else:
+        if self.type is MessageType.premium_guild_tier_2:
+            if self.content:
                 return (
                     f"{self.author.name} just boosted the server **{self.content}**"
                     f" times! {self.guild} has achieved **Level 2!**"
                 )
 
+            else:
+                return (
+                    f"{self.author.name} just boosted the server! {self.guild} has"
+                    " achieved **Level 2!**"
+                )
         if self.type is MessageType.premium_guild_tier_3:
             if not self.content:
                 return (
@@ -1454,13 +1453,12 @@ class Message(Hashable):
                 if not isinstance(file, File):
                     raise InvalidArgument("file parameter must be of type File")
                 files = [file]
-            else:
-                if len(files) > 10:
-                    raise InvalidArgument(
-                        "files parameter must be a list of up to 10 elements"
-                    )
-                elif not all(isinstance(file, File) for file in files):
-                    raise InvalidArgument("files parameter must be a list of File")
+            elif len(files) > 10:
+                raise InvalidArgument(
+                    "files parameter must be a list of up to 10 elements"
+                )
+            elif not all(isinstance(file, File) for file in files):
+                raise InvalidArgument("files parameter must be a list of File")
 
             if "attachments" not in payload:
                 # don't want it to remove any attachments when we just add a new file

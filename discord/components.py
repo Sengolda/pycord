@@ -432,9 +432,7 @@ class SelectOption:
 
     def __str__(self) -> str:
         base = f"{self.emoji} {self.label}" if self.emoji else self.label
-        if self.description:
-            return f"{base}\n{self.description}"
-        return base
+        return f"{base}\n{self.description}" if self.description else base
 
     @property
     def emoji(self) -> str | Emoji | PartialEmoji | None:

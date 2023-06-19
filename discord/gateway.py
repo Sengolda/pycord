@@ -81,9 +81,7 @@ class GatewayRatelimiter:
 
     def is_ratelimited(self):
         current = time.time()
-        if current > self.window + self.per:
-            return False
-        return self.remaining == 0
+        return False if current > self.window + self.per else self.remaining == 0
 
     def get_delay(self):
         current = time.time()
@@ -105,8 +103,7 @@ class GatewayRatelimiter:
 
     async def block(self):
         async with self.lock:
-            delta = self.get_delay()
-            if delta:
+            if delta := self.get_delay():
                 _log.warning(
                     "WebSocket in shard ID %s is ratelimited, waiting %.2f seconds",
                     self.shard_id,
@@ -657,13 +654,13 @@ class DiscordWebSocket:
                 raise ConnectionClosed(self.socket, shard_id=self.shard_id) from exc
 
     async def change_presence(self, *, activity=None, status=None, since=0.0):
-        if activity is not None:
-            if not isinstance(activity, BaseActivity):
-                raise InvalidArgument("activity must derive from BaseActivity.")
-            activity = [activity.to_dict()]
-        else:
+        if activity is None:
             activity = []
 
+        elif not isinstance(activity, BaseActivity):
+            raise InvalidArgument("activity must derive from BaseActivity.")
+        else:
+            activity = [activity.to_dict()]
         if status == "idle":
             since = int(time.time() * 1000)
 

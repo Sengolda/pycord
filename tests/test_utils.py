@@ -49,7 +49,7 @@ B = TypeVar("B")
 
 
 def test_temporary():
-    assert True
+    pass
 
 
 # def test_copy_doc() -> None:
