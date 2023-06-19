@@ -1072,22 +1072,19 @@ class SyncWebhook(BaseWebhook):
             previous_allowed_mentions=previous_mentions,
         )
         adapter: WebhookAdapter = _get_webhook_adapter()
-        thread_id: int | None = None
-        if thread is not MISSING:
-            thread_id = thread.id
-
-        data = adapter.execute_webhook(
-            self.id,
-            self.token,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-            thread_id=thread_id,
-            thread_name=thread_name,
-            wait=wait,
-        )
+        thread_id = thread.id if thread is not MISSING else None
         if wait:
+            data = adapter.execute_webhook(
+                self.id,
+                self.token,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+                thread_id=thread_id,
+                thread_name=thread_name,
+                wait=wait,
+            )
             return self._create_message(data)
 
     def fetch_message(
@@ -1214,10 +1211,7 @@ class SyncWebhook(BaseWebhook):
         )
         adapter: WebhookAdapter = _get_webhook_adapter()
 
-        thread_id: int | None = None
-        if thread is not MISSING:
-            thread_id = thread.id
-
+        thread_id = thread.id if thread is not MISSING else None
         data = adapter.edit_webhook_message(
             self.id,
             self.token,

@@ -205,7 +205,7 @@ class Select(Item[V]):
     def min_values(self, value: int):
         if value < 0 or value > 25:
             raise ValueError("min_values must be between 0 and 25")
-        self._underlying.min_values = int(value)
+        self._underlying.min_values = value
 
     @property
     def max_values(self) -> int:
@@ -216,7 +216,7 @@ class Select(Item[V]):
     def max_values(self, value: int):
         if value < 1 or value > 25:
             raise ValueError("max_values must be between 1 and 25")
-        self._underlying.max_values = int(value)
+        self._underlying.max_values = value
 
     @property
     def disabled(self) -> bool:
@@ -225,7 +225,7 @@ class Select(Item[V]):
 
     @disabled.setter
     def disabled(self, value: bool):
-        self._underlying.disabled = bool(value)
+        self._underlying.disabled = value
 
     @property
     def channel_types(self) -> list[ChannelType]:
@@ -394,10 +394,11 @@ class Select(Item[V]):
                         result = User(state=state, data=_data)
                     resolved.append(result)
         if select_type in (ComponentType.role_select, ComponentType.mentionable_select):
-            for role_id, _data in resolved_data.get("roles", {}).items():
-                if role_id not in selected_values:
-                    continue
-                resolved.append(Role(guild=guild, state=state, data=_data))
+            resolved.extend(
+                Role(guild=guild, state=state, data=_data)
+                for role_id, _data in resolved_data.get("roles", {}).items()
+                if role_id in selected_values
+            )
         return resolved
 
     @property

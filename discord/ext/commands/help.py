@@ -206,11 +206,11 @@ class _HelpCommandImpl(Command):
 
         on_error = injected.on_help_command_error
         if not hasattr(on_error, "__help_command_not_overridden__"):
-            if self.cog is not None:
-                self.on_error = self._on_error_cog_implementation
-            else:
+            if self.cog is None:
                 self.on_error = on_error
 
+            else:
+                self.on_error = self._on_error_cog_implementation
         await super().prepare(ctx)
 
     async def _parse_arguments(self, ctx):
@@ -1089,8 +1089,7 @@ class DefaultHelpCommand(HelpCommand):
         self.add_indented_commands(filtered, heading=self.commands_heading)
 
         if filtered:
-            note = self.get_ending_note()
-            if note:
+            if note := self.get_ending_note():
                 self.paginator.add_line()
                 self.paginator.add_line(note)
 
@@ -1105,8 +1104,7 @@ class DefaultHelpCommand(HelpCommand):
         )
         self.add_indented_commands(filtered, heading=self.commands_heading)
 
-        note = self.get_ending_note()
-        if note:
+        if note := self.get_ending_note():
             self.paginator.add_line()
             self.paginator.add_line(note)
 
@@ -1343,8 +1341,7 @@ class MinimalHelpCommand(HelpCommand):
         if bot.description:
             self.paginator.add_line(bot.description, empty=True)
 
-        note = self.get_opening_note()
-        if note:
+        if note := self.get_opening_note():
             self.paginator.add_line(note, empty=True)
 
         if cog.description:
@@ -1358,8 +1355,7 @@ class MinimalHelpCommand(HelpCommand):
             for command in filtered:
                 self.add_subcommand_formatting(command)
 
-            note = self.get_ending_note()
-            if note:
+            if note := self.get_ending_note():
                 self.paginator.add_line()
                 self.paginator.add_line(note)
 
@@ -1370,16 +1366,14 @@ class MinimalHelpCommand(HelpCommand):
 
         filtered = await self.filter_commands(group.commands, sort=self.sort_commands)
         if filtered:
-            note = self.get_opening_note()
-            if note:
+            if note := self.get_opening_note():
                 self.paginator.add_line(note, empty=True)
 
             self.paginator.add_line(f"**{self.commands_heading}**")
             for command in filtered:
                 self.add_subcommand_formatting(command)
 
-            note = self.get_ending_note()
-            if note:
+            if note := self.get_ending_note():
                 self.paginator.add_line()
                 self.paginator.add_line(note)
 

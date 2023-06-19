@@ -105,15 +105,11 @@ def _transform_roles(
 def _transform_member_id(
     entry: AuditLogEntry, data: Snowflake | None
 ) -> Member | User | None:
-    if data is None:
-        return None
-    return entry._get_member(int(data))
+    return None if data is None else entry._get_member(int(data))
 
 
 def _transform_guild_id(entry: AuditLogEntry, data: Snowflake | None) -> Guild | None:
-    if data is None:
-        return None
-    return entry._state._get_guild(data)
+    return None if data is None else entry._state._get_guild(data)
 
 
 def _transform_overwrites(
@@ -194,19 +190,13 @@ def _transform_type(
 def _transform_actions(
     entry: AuditLogEntry, data: list[AutoModActionPayload] | None
 ) -> AutoModAction | None:
-    if data is None:
-        return None
-    else:
-        return [AutoModAction.from_dict(d) for d in data]
+    return None if data is None else [AutoModAction.from_dict(d) for d in data]
 
 
 def _transform_trigger_metadata(
     entry: AuditLogEntry, data: list[AutoModActionPayload] | None
 ) -> AutoModAction | None:
-    if data is None:
-        return None
-    else:
-        return AutoModTriggerMetadata.from_dict(data)
+    return None if data is None else AutoModTriggerMetadata.from_dict(data)
 
 
 class AuditLogDiff:

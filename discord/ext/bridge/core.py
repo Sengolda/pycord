@@ -212,9 +212,7 @@ class BridgeCommand:
             # slash cmd prioritized
             result = getattr(self.slash_variant, name, MISSING)
             try:
-                if result is MISSING:
-                    return getattr(self.ext_variant, name)
-                return result
+                return getattr(self.ext_variant, name) if result is MISSING else result
             except AttributeError:
                 raise AttributeError(
                     f"'{self.__class__.__name__}' object has no attribute '{name}'"
@@ -356,7 +354,7 @@ class BridgeCommandGroup(BridgeCommand):
 
     def __init__(self, callback, *args, **kwargs):
         ext_var = BridgeExtGroup(callback, *args, **kwargs)
-        kwargs.update({"name": ext_var.name})
+        kwargs["name"] = ext_var.name
         super().__init__(
             callback,
             ext_variant=ext_var,
@@ -368,7 +366,7 @@ class BridgeCommandGroup(BridgeCommand):
 
         self.mapped: SlashCommand | None = None
         if map_to := getattr(callback, "__custom_map_to__", None):
-            kwargs.update(map_to)
+            kwargs |= map_to
             self.mapped = self.slash_variant.command(**kwargs)(callback)
 
     def walk_commands(self) -> Iterator[BridgeCommand]:

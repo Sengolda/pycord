@@ -222,9 +222,7 @@ class MemberConverter(IDConverter[discord.Member]):
 
         # If we're not being rate limited then we can use the websocket to actually query
         members = await guild.query_members(limit=1, user_ids=[user_id], cache=cache)
-        if not members:
-            return None
-        return members[0]
+        return None if not members else members[0]
 
     async def convert(self, ctx: Context, argument: str) -> discord.Member:
         bot = ctx.bot
@@ -372,21 +370,21 @@ class PartialMessageConverter(Converter[discord.PartialMessage]):
 
     @staticmethod
     def _resolve_channel(ctx, guild_id, channel_id) -> PartialMessageableChannel | None:
-        if guild_id is not None:
-            guild = ctx.bot.get_guild(guild_id)
-            if guild is not None and channel_id is not None:
-                return guild._resolve_channel(channel_id)  # type: ignore
-            else:
-                return None
-        else:
+        if guild_id is None:
             return ctx.bot.get_channel(channel_id) if channel_id else ctx.channel
+        guild = ctx.bot.get_guild(guild_id)
+        return (
+            guild._resolve_channel(channel_id)
+            if guild is not None and channel_id is not None
+            else None
+        )
 
     async def convert(self, ctx: Context, argument: str) -> discord.PartialMessage:
         guild_id, message_id, channel_id = self._get_id_matches(ctx, argument)
-        channel = self._resolve_channel(ctx, guild_id, channel_id)
-        if not channel:
+        if channel := self._resolve_channel(ctx, guild_id, channel_id):
+            return discord.PartialMessage(channel=channel, id=message_id)
+        else:
             raise ChannelNotFound(channel_id)
-        return discord.PartialMessage(channel=channel, id=message_id)
 
 
 class MessageConverter(IDConverter[discord.Message]):
@@ -409,8 +407,7 @@ class MessageConverter(IDConverter[discord.Message]):
         guild_id, message_id, channel_id = PartialMessageConverter._get_id_matches(
             ctx, argument
         )
-        message = ctx.bot._connection._get_message(message_id)
-        if message:
+        if message := ctx.bot._connection._get_message(message_id):
             return message
         channel = PartialMessageConverter._resolve_channel(ctx, guild_id, channel_id)
         if not channel:
@@ -486,16 +483,12 @@ class GuildChannelConverter(IDConverter[discord.abc.GuildChannel]):
             r"<#([0-9]{15,20})>$", argument
         )
         result = None
-        guild = ctx.guild
-
-        if match is None:
-            # not a mention
-            if guild:
+        if guild := ctx.guild:
+            if match is None:
                 iterable: Iterable[TT] = getattr(guild, attribute)
                 result: TT | None = discord.utils.get(iterable, name=argument)
-        else:
-            thread_id = int(match.group(1))
-            if guild:
+            else:
+                thread_id = int(match.group(1))
                 result = guild.get_thread(thread_id)
 
         if not result or not isinstance(result, type):
@@ -699,7 +692,7 @@ class ColourConverter(Converter[discord.Colour]):
         if argument[0] == "#":
             return self.parse_hex_number(argument[1:])
 
-        if argument[0:2] == "0x":
+        if argument.startswith("0x"):
             rest = argument[2:]
             # Legacy backwards compatible syntax
             if rest.startswith("#"):
@@ -707,7 +700,7 @@ class ColourConverter(Converter[discord.Colour]):
             return self.parse_hex_number(rest)
 
         arg = argument.lower()
-        if arg[0:3] == "rgb":
+        if arg.startswith("rgb"):
             return self.parse_rgb(arg)
 
         arg = arg.replace(" ", "_")
@@ -741,10 +734,9 @@ class RoleConverter(IDConverter[discord.Role]):
         if not guild:
             raise NoPrivateMessage()
 
-        match = self._get_id_match(argument) or re.match(
+        if match := self._get_id_match(argument) or re.match(
             r"<@&([0-9]{15,20})>$", argument
-        )
-        if match:
+        ):
             result = guild.get_role(int(match.group(1)))
         else:
             result = discord.utils.get(guild._roles.values(), name=argument)
@@ -772,8 +764,7 @@ class InviteConverter(Converter[discord.Invite]):
 
     async def convert(self, ctx: Context, argument: str) -> discord.Invite:
         try:
-            invite = await ctx.bot.fetch_invite(argument)
-            return invite
+            return await ctx.bot.fetch_invite(argument)
         except Exception as exc:
             raise BadInviteArgument(argument) from exc
 
@@ -800,8 +791,8 @@ class GuildConverter(IDConverter[discord.Guild]):
         if result is None:
             result = discord.utils.get(ctx.bot.guilds, name=argument)
 
-            if result is None:
-                raise GuildNotFound(argument)
+        if result is None:
+            raise GuildNotFound(argument)
         return result
 
 
@@ -858,12 +849,10 @@ class PartialEmojiConverter(Converter[discord.PartialEmoji]):
     """
 
     async def convert(self, ctx: Context, argument: str) -> discord.PartialEmoji:
-        match = re.match(r"<(a?):(\w{1,32}):([0-9]{15,20})>$", argument)
-
-        if match:
-            emoji_animated = bool(match.group(1))
-            emoji_name = match.group(2)
-            emoji_id = int(match.group(3))
+        if match := re.match(r"<(a?):(\w{1,32}):([0-9]{15,20})>$", argument):
+            emoji_animated = bool(match[1])
+            emoji_name = match[2]
+            emoji_id = int(match[3])
 
             return discord.PartialEmoji.with_state(
                 ctx.bot._connection,
@@ -1072,9 +1061,9 @@ class Greedy(List[T]):
 
 def _convert_to_bool(argument: str) -> bool:
     lowered = argument.lower()
-    if lowered in ("yes", "y", "true", "t", "1", "enable", "on"):
+    if lowered in {"yes", "y", "true", "t", "1", "enable", "on"}:
         return True
-    elif lowered in ("no", "n", "false", "f", "0", "disable", "off"):
+    elif lowered in {"no", "n", "false", "f", "0", "disable", "off"}:
         return False
     else:
         raise BadBoolArgument(lowered)

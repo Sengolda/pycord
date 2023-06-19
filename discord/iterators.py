@@ -331,10 +331,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
 
     def _get_retrieve(self):
         l = self.limit
-        if l is None or l > 100:
-            r = 100
-        else:
-            r = l
+        r = 100 if l is None or l > 100 else l
         self.retrieve = r
         return r > 0
 
@@ -485,10 +482,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
     def _get_retrieve(self):
         l = self.limit
-        if l is None or l > 100:
-            r = 100
-        else:
-            r = l
+        r = 100 if l is None or l > 100 else l
         self.retrieve = r
         return r > 0
 
@@ -584,10 +578,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
 
     def _get_retrieve(self):
         l = self.limit
-        if l is None or l > 100:
-            r = 100
-        else:
-            r = l
+        r = 100 if l is None or l > 100 else l
         self.retrieve = r
         return r > 0
 
@@ -657,10 +648,7 @@ class MemberIterator(_AsyncIterator["Member"]):
 
     def _get_retrieve(self):
         l = self.limit
-        if l is None or l > 1000:
-            r = 1000
-        else:
-            r = l
+        r = 1000 if l is None or l > 1000 else l
         self.retrieve = r
         return r > 0
 
@@ -709,10 +697,7 @@ class BanIterator(_AsyncIterator["BanEntry"]):
 
     def _get_retrieve(self):
         l = self.limit
-        if l is None or l > 1000:
-            r = 1000
-        else:
-            r = l
+        r = 1000 if l is None or l > 1000 else l
         self.retrieve = r
         return r > 0
 
@@ -769,15 +754,15 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         if before is None:
             self.before = None
         elif isinstance(before, datetime.datetime):
-            if joined:
-                self.before = str(time_snowflake(before, high=False))
-            else:
-                self.before = before.isoformat()
+            self.before = (
+                str(time_snowflake(before, high=False))
+                if joined
+                else before.isoformat()
+            )
+        elif joined:
+            self.before = str(before.id)
         else:
-            if joined:
-                self.before = str(before.id)
-            else:
-                self.before = snowflake_time(before.id).isoformat()
+            self.before = snowflake_time(before.id).isoformat()
 
         self.update_before: Callable[[ThreadPayload], str] = self.get_archive_timestamp
 
@@ -870,10 +855,7 @@ class ScheduledEventSubscribersIterator(_AsyncIterator[Union["User", "Member"]])
 
     def _get_retrieve(self):
         l = self.limit
-        if l is None or l > 100:
-            r = 100
-        else:
-            r = l
+        r = 100 if l is None or l > 100 else l
         self.retrieve = r
         return r > 0
 

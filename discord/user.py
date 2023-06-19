@@ -236,9 +236,7 @@ class BaseUser(_UserTag):
 
             This information is only available via :meth:`Client.fetch_user`.
         """
-        if self._accent_colour is None:
-            return None
-        return Colour(self._accent_colour)
+        return None if self._accent_colour is None else Colour(self._accent_colour)
 
     @property
     def accent_color(self) -> Colour | None:
@@ -535,8 +533,7 @@ class User(BaseUser, discord.abc.Messageable):
         return self
 
     async def _get_channel(self) -> DMChannel:
-        ch = await self.create_dm()
-        return ch
+        return await self.create_dm()
 
     @property
     def dm_channel(self) -> DMChannel | None:

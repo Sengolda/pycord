@@ -528,7 +528,7 @@ class _TextChannel(discord.abc.GuildChannel, Hashable):
             avatar = utils._bytes_to_base64_data(avatar)  # type: ignore
 
         data = await self._state.http.create_webhook(
-            self.id, name=str(name), avatar=avatar, reason=reason
+            self.id, name=name, avatar=avatar, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
 
@@ -1759,7 +1759,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
             avatar = utils._bytes_to_base64_data(avatar)  # type: ignore
 
         data = await self._state.http.create_webhook(
-            self.id, name=str(name), avatar=avatar, reason=reason
+            self.id, name=name, avatar=avatar, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
 
@@ -2285,7 +2285,7 @@ class StageChannel(discord.abc.Messageable, VocalGuildChannel):
             avatar = utils._bytes_to_base64_data(avatar)  # type: ignore
 
         data = await self._state.http.create_webhook(
-            self.id, name=str(name), avatar=avatar, reason=reason
+            self.id, name=name, avatar=avatar, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
 

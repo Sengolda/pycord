@@ -492,11 +492,10 @@ class AutoShardedClient(Client):
             except Exception:
                 pass
 
-        to_close = [
+        if to_close := [
             asyncio.ensure_future(shard.close(), loop=self.loop)
             for shard in self.__shards.values()
-        ]
-        if to_close:
+        ]:
             await asyncio.wait(to_close)
 
         await self.http.close()

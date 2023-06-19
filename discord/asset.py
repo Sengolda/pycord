@@ -354,13 +354,13 @@ class Asset(AssetMixin):
                 )
             url = url.with_path(f"{path}.{static_format}")
 
-        if size is not MISSING:
-            if not utils.valid_icon_size(size):
-                raise InvalidArgument("size must be a power of 2 between 16 and 4096")
-            url = url.with_query(size=size)
-        else:
+        if size is MISSING:
             url = url.with_query(url.raw_query_string)
 
+        elif not utils.valid_icon_size(size):
+            raise InvalidArgument("size must be a power of 2 between 16 and 4096")
+        else:
+            url = url.with_query(size=size)
         url = str(url)
         return Asset(state=self._state, url=url, key=self._key, animated=self._animated)
 
@@ -440,6 +440,4 @@ class Asset(AssetMixin):
             The asset had an invalid format.
         """
 
-        if self._animated:
-            return self
-        return self.with_format(format)
+        return self if self._animated else self.with_format(format)

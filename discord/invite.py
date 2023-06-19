@@ -477,10 +477,7 @@ class Invite(Hashable):
         if channel is not None:
             return channel
 
-        if data is None:
-            return None
-
-        return PartialInviteChannel(data)
+        return None if data is None else PartialInviteChannel(data)
 
     def __str__(self) -> str:
         return self.url

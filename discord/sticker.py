@@ -378,9 +378,7 @@ class StandardSticker(Sticker):
             await self._state.http.list_premium_sticker_packs()
         )
         packs = data["sticker_packs"]
-        pack = find(lambda d: int(d["id"]) == self.pack_id, packs)
-
-        if pack:
+        if pack := find(lambda d: int(d["id"]) == self.pack_id, packs):
             return StickerPack(state=self._state, data=pack)
         raise InvalidData(f"Could not find corresponding sticker pack for {self!r}")
 

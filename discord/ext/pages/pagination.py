@@ -565,12 +565,11 @@ class Paginator(discord.ui.View):
             if trigger_on_display is not None
             else self.trigger_on_display
         )
+        self.buttons = {}
         if custom_buttons and not self.use_default_buttons:
-            self.buttons = {}
             for button in custom_buttons:
                 self.add_button(button)
         else:
-            self.buttons = {}
             self.add_default_buttons()
 
         await self.goto_page(self.current_page, interaction=interaction)
@@ -713,9 +712,7 @@ class Paginator(discord.ui.View):
             await self.page_action(interaction=interaction)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if self.usercheck:
-            return self.user == interaction.user
-        return True
+        return self.user == interaction.user if self.usercheck else True
 
     def add_menu(self):
         """Adds the default :class:`PaginatorMenu` instance to the paginator."""

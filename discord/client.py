@@ -310,9 +310,7 @@ class Client:
 
         .. versionadded:: 1.6
         """
-        if self.ws:
-            return self.ws.is_ratelimited()
-        return False
+        return self.ws.is_ratelimited() if self.ws else False
 
     @property
     def user(self) -> ClientUser | None:
@@ -420,8 +418,7 @@ class Client:
         _log.debug("Dispatching event %s", event)
         method = f"on_{event}"
 
-        listeners = self._listeners.get(event)
-        if listeners:
+        if listeners := self._listeners.get(event):
             removed = []
             for i, (future, condition) in enumerate(listeners):
                 if future.cancelled():
@@ -435,7 +432,7 @@ class Client:
                     removed.append(i)
                 else:
                     if result:
-                        if len(args) == 0:
+                        if not args:
                             future.set_result(None)
                         elif len(args) == 1:
                             future.set_result(args[0])
@@ -734,7 +731,7 @@ class Client:
         try:
             loop.add_signal_handler(signal.SIGINT, loop.stop)
             loop.add_signal_handler(signal.SIGTERM, loop.stop)
-        except (NotImplementedError, RuntimeError):
+        except RuntimeError:
             pass
 
         async def runner():
@@ -1558,11 +1555,7 @@ class Client:
         :exc:`InvalidArgument`
             Invalid icon image format given. Must be PNG or JPG.
         """
-        if icon is not MISSING:
-            icon_base64 = utils._bytes_to_base64_data(icon)
-        else:
-            icon_base64 = None
-
+        icon_base64 = None if icon is MISSING else utils._bytes_to_base64_data(icon)
         if code:
             data = await self.http.create_from_template(code, name, icon_base64)
         else:
@@ -1905,8 +1898,7 @@ class Client:
             The channel that was created.
         """
         state = self._connection
-        found = state._get_private_channel_by_user(user.id)
-        if found:
+        if found := state._get_private_channel_by_user(user.id):
             return found
 
         data = await state.http.start_private_message(user.id)

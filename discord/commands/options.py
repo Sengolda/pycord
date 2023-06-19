@@ -382,7 +382,7 @@ class OptionChoice:
         value: str | int | float | None = None,
         name_localizations: dict[str, str] = MISSING,
     ):
-        self.name = str(name)
+        self.name = name
         self.value = value if value is not None else name
         self.name_localizations = name_localizations
 

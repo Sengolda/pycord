@@ -402,8 +402,7 @@ class Member(discord.abc.Messageable, _UserTag):
         return self
 
     async def _get_channel(self):
-        ch = await self.create_dm()
-        return ch
+        return await self.create_dm()
 
     def _update(self, data: MemberPayload) -> None:
         # the nickname change is optional,
@@ -434,9 +433,7 @@ class Member(discord.abc.Messageable, _UserTag):
         }
         self._client_status[None] = sys.intern(data["status"])
 
-        if len(user) > 1:
-            return self._update_inner_user(user)
-        return None
+        return self._update_inner_user(user) if len(user) > 1 else None
 
     def _update_inner_user(self, user: UserPayload) -> tuple[User, User] | None:
         u = self._user
@@ -545,8 +542,7 @@ class Member(discord.abc.Messageable, _UserTag):
         result = []
         g = self.guild
         for role_id in self._roles:
-            role = g.get_role(role_id)
-            if role:
+            if role := g.get_role(role_id):
                 result.append(role)
         result.append(g.default_role)
         result.sort()
@@ -661,10 +657,7 @@ class Member(discord.abc.Messageable, _UserTag):
         for r in self.roles:
             base.value |= r.permissions.value
 
-        if base.administrator:
-            return Permissions.all()
-
-        return base
+        return Permissions.all() if base.administrator else base
 
     @property
     def voice(self) -> VoiceState | None:

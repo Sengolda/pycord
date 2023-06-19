@@ -23,6 +23,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
+
 from __future__ import annotations
 
 import inspect
@@ -33,11 +34,7 @@ from typing import TYPE_CHECKING, Any, Iterator, Literal, Pattern, TypeVar, Unio
 
 from discord.utils import MISSING, MissingField, maybe_coroutine, resolve_annotation
 
-if sys.version_info >= (3, 11):
-    _MISSING = MissingField
-else:
-    _MISSING = MISSING
-
+_MISSING = MissingField if sys.version_info >= (3, 11) else MISSING
 from .converter import run_converters
 from .errors import (
     BadFlagArgument,
@@ -300,10 +297,7 @@ class FlagsMeta(type):
             if frame is None:
                 local_ns = {}
             else:
-                if frame.f_back is None:
-                    local_ns = frame.f_locals
-                else:
-                    local_ns = frame.f_back.f_locals
+                local_ns = frame.f_locals if frame.f_back is None else frame.f_back.f_locals
         finally:
             del frame
 
@@ -311,8 +305,8 @@ class FlagsMeta(type):
         aliases: dict[str, str] = {}
         for base in reversed(bases):
             if base.__dict__.get("__commands_is_flag__", False):
-                flags.update(base.__dict__["__commands_flags__"])
-                aliases.update(base.__dict__["__commands_flag_aliases__"])
+                flags |= base.__dict__["__commands_flags__"]
+                aliases |= base.__dict__["__commands_flag_aliases__"]
                 if case_insensitive is MISSING:
                     attrs["__commands_flag_case_insensitive__"] = base.__dict__[
                         "__commands_flag_case_insensitive__"
@@ -621,13 +615,12 @@ class FlagConverter(metaclass=FlagsMeta):
             except KeyError:
                 if flag.required:
                     raise MissingRequiredFlag(flag)
+                if callable(flag.default):
+                    default = await maybe_coroutine(flag.default, ctx)
+                    setattr(self, flag.attribute, default)
                 else:
-                    if callable(flag.default):
-                        default = await maybe_coroutine(flag.default, ctx)
-                        setattr(self, flag.attribute, default)
-                    else:
-                        setattr(self, flag.attribute, flag.default)
-                    continue
+                    setattr(self, flag.attribute, flag.default)
+                continue
 
             if 0 < flag.max_args < len(values):
                 if flag.override:

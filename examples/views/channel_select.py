@@ -14,8 +14,7 @@ class DropdownView(discord.ui.View):
         self, select: discord.ui.Select, interaction: discord.Interaction
     ) -> None:
         await interaction.response.send_message(
-            f"You selected the following channels:"
-            + f", ".join(f"{channel.mention}" for channel in select.values)
+            f'You selected the following channels:{", ".join(f"{channel.mention}" for channel in select.values)}'
         )
 
 
